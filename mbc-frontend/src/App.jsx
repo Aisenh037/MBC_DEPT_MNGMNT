@@ -1,6 +1,6 @@
 ﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import RequireAuth from './components/requireAuth';
-import LoginPage from './features/auth/loginPage';
+import LoginPage from './features/auth/LoginPage'; // Ensure the path is correct
 import AssignmentsPage from './features/assignments/AssignmentsPage';
 
 import AdminDashboard from './features/dashboard/admin/AdminDashboard';
@@ -12,7 +12,6 @@ import ProfessorDashboard from './features/dashboard/Professors/ProfessorDashboa
 import StudentDashboard from './features/dashboard/Students/StudentDashboard';
 
 import Layout from './components/layout/layout'; //  Used only for professors/students/shared views
-import BranchDashboard from './features/dashboard/admin/BranchDashboard';
 
 export default function App() {
   return (
