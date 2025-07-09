@@ -1,6 +1,6 @@
 ﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import RequireAuth from './components/requireAuth';
-import LoginPage from './features/auth/loginpage';
+import LoginPage from './features/auth/loginPage';
 import AssignmentsPage from './features/assignments/AssignmentsPage';
 
 import AdminDashboard from './features/dashboard/admin/AdminDashboard';
