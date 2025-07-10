@@ -89,7 +89,7 @@ const initializeApp = async () => {
   const allowedOrigins = [
     'http://localhost:5174',
     'http://127.0.0.1:5174',
-    'https://mbc-dept-mngmnt.vercel.app/'
+    'https://mbc-dept-mngmnt.vercel.app'
   ];
 
   app.use(

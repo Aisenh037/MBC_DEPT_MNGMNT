@@ -1,5 +1,4 @@
 import axios from 'axios'
-import api from '../utils/api'; // Adjust the path as needed
 import { useAuthStore } from '../stores/authStore'
 
 // ✅ Use the correct base URL from `.env`
