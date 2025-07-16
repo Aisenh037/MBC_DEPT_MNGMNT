@@ -1,14 +1,18 @@
-import React from "react";
-import { Typography, Paper } from "@mui/material";
+import React from 'react';
 
-export default function StudentSection() {
+function StudentDashboard() {
   return (
-    <Paper elevation={3} sx={{ p: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Students
-      </Typography>
-      {/* Later, map students from API */}
-      <Typography>No students yet.</Typography>
-    </Paper>
+    <div>
+      <h2>Student Dashboard</h2>
+      <p>Welcome! Here you can:</p>
+      <ul>
+        <li>View your attendance records by subject and date</li>
+        <li>Check your marks for all subjects and exams</li>
+        <li>See notices and important updates from teachers and admin</li>
+        <li>Download your report cards or attendance sheets</li>
+      </ul>
+    </div>
   );
 }
+
+export default StudentDashboard;

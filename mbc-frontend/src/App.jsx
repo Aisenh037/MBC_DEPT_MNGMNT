@@ -1,72 +1,58 @@
-﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import RequireAuth from './components/requireAuth';
-import LoginPage from './features/auth/LoginPage'; // Ensure the path is correct
-import AssignmentsPage from './features/assignments/AssignmentsPage';
+﻿import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
 
-import AdminDashboard from './features/dashboard/admin/AdminDashboard';
-import StudentManagement from './features/dashboard/admin/StudentManagement';
-import BranchManagement from './features/dashboard/admin/BranchManagement';
-import ProfessorManagement from './features/dashboard/admin/ProfessorManagement';
 
-import ProfessorDashboard from './features/dashboard/Professors/ProfessorDashboard';
-import StudentDashboard from './features/dashboard/Students/StudentDashboard';
+import AdminDashboard from "./features/dashboard/admin/AdminDashboard";
+import AdminStudents from "./features/dashboard/admin/StudentManagement";
+import AdminTeachers from "./features/dashboard/admin/ProfessorManagement";
+import AdminBranches from "./features/dashboard/admin/BranchManagement";
+import AdminNotices from "./features/dashboard/admin/NoticeManagement";
 
-import Layout from './components/layout/layout'; //  Used only for professors/students/shared views
+
+import TeacherDashboard from "./features/dashboard/Professors/ProfessorDashboard";
+
+
+import StudentDashboard from "./features/dashboard/Students/StudentDashboard";
+
+
+import Unauthorized from "./pages/Unauthorized";
+import NotFound from "./pages/NotFound";
+import Layout from "./components/layout/Layout";
+import RequireAuth from "./components/UI/RequireAuth";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/*  Public Routes */}
-        <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/login" element={<LoginPage />} />
+        {/* Public Route */}
+        <Route path="/" element={<Login />} />
 
-        {/* 🛡 Admin Routes - No shared Layout */}
-        <Route element={<RequireAuth allowedRoles={['admin']} />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/manage-branches" element={<BranchManagement />} />
-          <Route path="/admin/manage-professors" element={<ProfessorManagement />} />
-          <Route path="/admin/manage-students" element={<StudentManagement />} />
+        {/* Shared Layout */}
+        <Route element={<Layout />}>
+          {/* Admin Routes */}
+          <Route element={<RequireAuth allowedRoles={["admin"]} />}>
+            <Route path="/admin" element={<AdminDashboard />}>
+              <Route path="students" element={<AdminStudents />} />
+              <Route path="teachers" element={<AdminTeachers />} />
+              <Route path="branches" element={<AdminBranches />} />
+              <Route path="notices" element={<AdminNotices />} />
+            </Route>
+          </Route>
+
+          {/* Teacher Route */}
+          <Route element={<RequireAuth allowedRoles={["teacher"]} />}>
+            <Route path="/teacher" element={<TeacherDashboard />} />
+          </Route>
+
+          {/* Student Route */}
+          <Route element={<RequireAuth allowedRoles={["student"]} />}>
+            <Route path="/student" element={<StudentDashboard />} />
+          </Route>
         </Route>
 
-        {/* 🎓 Professor Routes - With Layout */}
-        <Route element={<RequireAuth allowedRoles={['professor']} />}>
-          <Route
-            path="/professor/dashboard"
-            element={
-              <Layout>
-                <ProfessorDashboard />
-              </Layout>
-            }
-          />
-        </Route>
-
-        {/*  Student Routes - With Layout */}
-        <Route element={<RequireAuth allowedRoles={['student']} />}>
-          <Route
-            path="/student/dashboard"
-            element={
-              <Layout>
-                <StudentDashboard />
-              </Layout>
-            }
-          />
-        </Route>
-
-        {/*  Shared Assignments Route - With Layout */}
-        <Route element={<RequireAuth allowedRoles={['admin', 'student', 'professor']} />}>
-          <Route
-            path="/assignments"
-            element={
-              <Layout>
-                <AssignmentsPage />
-              </Layout>
-            }
-          />
-        </Route>
-
-        {/*  Fallback Route */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Unauthorized and Not Found */}
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

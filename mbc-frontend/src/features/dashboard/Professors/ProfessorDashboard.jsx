@@ -1,14 +1,19 @@
-import React from "react";
-import { Typography, Paper } from "@mui/material";
+import React from 'react';
 
-export default function ProfessorSection() {
+function TeacherDashboard() {
   return (
-    <Paper elevation={3} sx={{ p: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Professors
-      </Typography>
-      {/* Later, map professors from API */}
-      <Typography>No professors yet.</Typography>
-    </Paper>
+    <div>
+      <h2>Teacher Dashboard</h2>
+      <p>Welcome! Here you can:</p>
+      <ul>
+        <li>View and manage your assigned subjects</li>
+        <li>See the list of students in your classes</li>
+        <li>Mark and review attendance</li>
+        <li>Update and review students’ marks</li>
+        <li>See relevant notices from admin</li>
+      </ul>
+    </div>
   );
 }
+
+export default TeacherDashboard;

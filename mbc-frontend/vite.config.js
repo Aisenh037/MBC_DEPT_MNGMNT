@@ -12,7 +12,11 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
-        // No rewrite - keeps /api prefix
+      },
+      '/uploads': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
       },
     },
   },
