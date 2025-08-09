@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: mbc-backend
+    env: node
+    rootDir: mbc-backend
+    buildCommand: npm ci
+    startCommand: node index.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set MONGO_URI and JWT_SECRET in the Render dashboard for this service
+
+  - type: static
+    name: mbc-frontend
+    rootDir: mbc-frontend
+    buildCommand: npm ci && npm run build
+    publishPath: dist
+    
+    # Optionally set VITE_API_URL in the Render dashboard to your backend URL, e.g. https://mbc-backend.onrender.com

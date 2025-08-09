@@ -27,9 +27,18 @@ import studentDashboardRoutes from './routes/studentDashboard.js';
 
 dotenv.config();
 const app = express();
-app.use(cors());
+
+// Respect CORS origin from env in production
+const corsOptions = process.env.CORS_ORIGIN
+  ? { origin: process.env.CORS_ORIGIN.split(',').map((o) => o.trim()), credentials: true }
+  : {};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Health check
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use('/api/auth', authRoutes);
 

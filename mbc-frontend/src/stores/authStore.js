@@ -1,11 +1,11 @@
-﻿import { create } from "zustand";
-import axios from "axios";
+import { create } from "zustand";
+import api from "../api/axios";
 
 export const useAuthStore = create((set) => ({
   user: null,
   token: null,
   login: async ({ email, password }) => {
-    const res = await axios.post("/api/auth/login", { email, password });
+    const res = await api.post("/auth/login", { email, password });
     set({ user: res.data, token: res.data.token });
     localStorage.setItem("token", res.data.token);
   },
@@ -17,7 +17,7 @@ export const useAuthStore = create((set) => ({
     const token = localStorage.getItem("token");
     if (!token) throw new Error("Not authenticated");
     // Optionally verify with backend
-    // const res = await axios.get("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } });
+    // const res = await api.get("/auth/me");
     // set({ user: res.data, token });
   },
 }));

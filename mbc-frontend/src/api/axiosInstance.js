@@ -1,20 +1,18 @@
 import axios from 'axios'
 import { useAuthStore } from '../stores/authStore'
 
-// ✅ Use the correct base URL from `.env`
-// Should be like: VITE_API_URL=https://mbc-dept-management.onrender.com/api/v1
-const baseURL = import.meta.env.VITE_API_URL + '/api/v1';
+// Base API root, e.g. VITE_API_URL=https://mbc-backend.onrender.com
+const apiRoot = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
+const baseURL = `${apiRoot}/api`
 
-// ✅ Axios instance with CORS credentials enabled
 const api = axios.create({
-  baseURL, // 🔥 Uses the proper backend URL
-  withCredentials: true, // Crucial for cross-origin auth
+  baseURL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// ✅ Attach token to Authorization header
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -23,7 +21,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auto logout on 401 Unauthorized
 api.interceptors.response.use(
   (response) => response,
   (error) => {
