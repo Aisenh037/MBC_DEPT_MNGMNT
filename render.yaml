@@ -5,6 +5,7 @@ services:
     rootDir: mbc-backend
     buildCommand: npm ci
     startCommand: node index.js
+    healthCheckPath: /health
     autoDeploy: true
     envVars:
       - key: NODE_ENV
