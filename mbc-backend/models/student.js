@@ -27,6 +27,6 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-studentSchema.index({ scholarNo: 1 }, { unique: true });
+// studentSchema.index({ scholarNo: 1 }, { unique: true });
 
 export default mongoose.model('Student', studentSchema);

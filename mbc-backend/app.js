@@ -1,4 +1,6 @@
-// app.js
+// app.js — Main Entry Point of the Backend
+// Purpose: Configure middleware, connect routes, and set up security for our API.
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -12,11 +14,11 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Import Utilities
+// Utilities
 import logger from './utils/logger.js';
 import errorHandler from './middleware/errorHandler.js';
 
-// Import All Routes
+// Routes (Modularized — Separation of Concerns)
 import authRoutes from './routes/authRoute.js';
 import usersRoutes from './routes/usersRouter.js';
 import professorsRoutes from './routes/professorRoute.js';
@@ -30,74 +32,69 @@ import noticeRoutes from './routes/noticeRoute.js';
 import analyticsRoutes from './routes/analytics.js';
 import studentDashboardRoutes from './routes/studentDashboard.js';
 import teacherDashboardRoutes from './routes/teacherDashboard.js';
-// Add any other route imports here...
 
 // Load environment variables
 dotenv.config();
 
-// Get __dirname equivalent in ES modules
+// __dirname workaround for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
-// Initialize the Express application
+// Create Express App
 const app = express();
 
-// Honor proxy headers (Render/Heroku/etc.)
+// Trust proxy headers (important for hosting services like Render/Heroku)
 app.set('trust proxy', 1);
 
-// --- Core Middleware ---
+/* ==========================
+   GLOBAL MIDDLEWARE
+   ========================== */
 
-
-// Body parser for JSON
+// Parse incoming JSON requests
 app.use(express.json());
-// Cookie parser
+
+// Parse cookies from request headers
 app.use(cookieParser());
-// Logger (using morgan stream piped to winston)
+
+// Log requests in development mode (good for debugging)
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev', { stream: logger.stream }));
 }
 
-// --- Security Middleware ---
+/* ==========================
+   SECURITY MIDDLEWARE
+   ========================== */
+// These protect against common web vulnerabilities
+app.use(helmet());             // Sets secure HTTP headers
+app.use(xss());                // Prevents Cross-site Scripting (XSS) attacks
+app.use(mongoSanitize());      // Prevents MongoDB operator injection
+app.use(hpp());                // Prevents HTTP Parameter Pollution
 
-// Set security HTTP headers
-app.use(helmet());
-// Prevent XSS attacks
-app.use(xss());
-// Sanitize user input from MongoDB query injection
-app.use(mongoSanitize());
-// Prevent HTTP Parameter Pollution
-app.use(hpp());
-
-// CORS configuration
+// Enable CORS (Cross-Origin Resource Sharing)
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN && process.env.CORS_ORIGIN.trim().length > 0
-    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
     : true,
-  credentials: true, // Allow cookies to be sent
+  credentials: true, // Allow sending cookies across domains
 };
 app.use(cors(corsOptions));
 
-
-// Rate limiting
+// Limit repeated requests to API endpoints
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: 'Too many requests from this IP, please try again after 15 minutes',
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 100,                 // max requests per IP
+  message: 'Too many requests from this IP. Please try again later.',
 });
 app.use('/api', limiter);
 
-// --- Static Files ---
-
-
-// Serve uploaded files statically
+/* ==========================
+   STATIC FILES
+   ========================== */
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-
-// --- API Routes ---
-
+/* ==========================
+   API ROUTES
+   ========================== */
 const API_PREFIX = '/api/v1';
 
 app.use(`${API_PREFIX}/auth`, authRoutes);
@@ -114,21 +111,30 @@ app.use(`${API_PREFIX}/analytics`, analyticsRoutes);
 app.use(`${API_PREFIX}/dashboards/student`, studentDashboardRoutes);
 app.use(`${API_PREFIX}/dashboards/teacher`, teacherDashboardRoutes);
 
-// Simple health check endpoint
+/* ==========================
+   HEALTH CHECK
+   ========================== */
 app.get('/', (req, res) => {
-  res.status(200).json({ success: true, message: 'Server is healthy' });
+  res.status(200).json({
+    success: true,
+    message: 'Server is running smoothly 🚀',
+  });
 });
 
-// 404 for unknown API routes
+/* ==========================
+   404 HANDLER
+   ========================== */
 app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
-    return res.status(404).json({ success: false, error: 'Not Found' });
+    return res.status(404).json({ success: false, error: 'API endpoint not found' });
   }
-  return next();
+  next();
 });
 
-// --- Error Handling Middleware ---
-// This must be the LAST piece of middleware
+/* ==========================
+   GLOBAL ERROR HANDLER
+   ========================== */
+// This will catch all errors from the routes/middleware
 app.use(errorHandler);
 
 export default app;

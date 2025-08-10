@@ -8,7 +8,7 @@
     "node": ">=18.17.0"
   },
   "scripts": {
-    "start": "NODE_ENV=production node index.js",
+    "start": "cross-env NODE_ENV=production node index.js",
     "dev": "nodemon index.js",
     "test": "jest --watchAll --detectOpenHandles",
     "lint": "eslint . --ext .js"
@@ -25,6 +25,7 @@
     "colors": "^1.4.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "cross-env": "^10.0.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-mongo-sanitize": "^2.2.0",
