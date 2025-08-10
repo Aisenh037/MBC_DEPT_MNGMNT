@@ -1,12 +1,28 @@
+// src/features/auth/RegisterPage.jsx
 import { useState } from 'react';
-import axios from 'axios';
+import { useAuthStore } from '../../stores/authStore';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import {
+  Box, Button, CircularProgress, TextField, Typography, Link,
+  Select, MenuItem, FormControl, InputLabel, Grid
+} from '@mui/material';
+import AuthLayout from '../../layouts/AuthLayout';
+import { useNotify } from '../../components/UI/NotificationProvider';
 
 export default function RegisterPage() {
+  const { register } = useAuthStore();
+  const navigate = useNavigate();
+  const notify = useNotify();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
+    role: 'student', // Default role
+    scholarNo: '',
+    employeeId: '',
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,93 +30,61 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      await axios.post('/api/register', formData); // backend proxy assumed
-      alert('Registration successful. You can now log in!');
-      // Optional: redirect to login page
+      await register(formData);
+      notify('Registration successful! Please log in.', 'success');
+      navigate('/'); // Redirect to login page on success
     } catch (err) {
-      console.error(err);
-      alert('Registration failed. Please try again.');
+      notify(err.response?.data?.error || 'Registration failed. Please try again.', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const styles = {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#f5f5f5',
-    },
-    form: {
-      backgroundColor: 'white',
-      padding: '30px',
-      borderRadius: '8px',
-      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-      width: '300px',
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    input: {
-      padding: '12px',
-      marginBottom: '15px',
-      border: '1px solid #ccc',
-      borderRadius: '6px',
-      fontSize: '16px',
-    },
-    button: {
-      backgroundColor: '#1976d2',
-      color: '#fff',
-      padding: '12px',
-      border: 'none',
-      borderRadius: '6px',
-      fontSize: '16px',
-      cursor: 'pointer',
-    },
-    heading: {
-      textAlign: 'center',
-      marginBottom: '20px',
-      fontSize: '24px',
-      color: '#333',
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <h2 style={styles.heading}>Register</h2>
-        <input
-          style={styles.input}
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          style={styles.input}
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-        <input
-          style={styles.input}
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-        <button type="submit" style={styles.button}>
-          REGISTER
-        </button>
-      </form>
-    </div>
+    <AuthLayout title="Create an Account">
+      <Box component="form" onSubmit={handleSubmit} noValidate>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField label="Full Name" name="name" value={formData.name} onChange={handleChange} required fullWidth />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField label="Email Address" name="email" type="email" value={formData.email} onChange={handleChange} required fullWidth />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField label="Password" name="password" type="password" value={formData.password} onChange={handleChange} required fullWidth />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth required>
+              <InputLabel>I am a...</InputLabel>
+              <Select name="role" value={formData.role} label="I am a..." onChange={handleChange}>
+                <MenuItem value="student">Student</MenuItem>
+                <MenuItem value="teacher">Teacher</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          {formData.role === 'student' && (
+            <Grid item xs={12}>
+              <TextField label="Scholar Number" name="scholarNo" value={formData.scholarNo} onChange={handleChange} required fullWidth />
+            </Grid>
+          )}
+          {formData.role === 'teacher' && (
+            <Grid item xs={12}>
+              <TextField label="Employee ID" name="employeeId" value={formData.employeeId} onChange={handleChange} required fullWidth />
+            </Grid>
+          )}
+        </Grid>
+        <Button type="submit" fullWidth variant="contained" disabled={loading} sx={{ mt: 3, mb: 2, py: 1.5 }}>
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
+        </Button>
+        <Typography variant="body2" align="center">
+          Already have an account?{' '}
+          <Link component={RouterLink} to="/" variant="body2">
+            Sign In
+          </Link>
+        </Typography>
+      </Box>
+    </AuthLayout>
   );
 }

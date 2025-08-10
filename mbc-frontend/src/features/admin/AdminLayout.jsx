@@ -1,0 +1,31 @@
+// src/features/admin/AdminLayout.jsx
+import React from 'react';
+import { Box } from '@mui/material';
+import AdminSidebar from '../../components/Layout/AdminSidebar';
+import AdminHeader from '../../components/Layout/AdminHeader';
+import { Outlet } from 'react-router-dom';
+
+const drawerWidth = 240;
+
+export default function AdminLayout() {
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <AdminSidebar />
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          minHeight: '100vh',
+          bgcolor: 'grey.100',
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <AdminHeader />
+          {/* All nested admin routes will render here */}
+          <Outlet />
+        </Box>
+      </Box>
+    </Box>
+  );
+}

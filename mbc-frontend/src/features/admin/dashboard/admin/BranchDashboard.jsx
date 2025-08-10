@@ -1,62 +1,70 @@
+// src/features/admin/dashboard/admin/BranchDashboard.jsx
 import React from 'react';
 import { Box, Typography, Paper, Button, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import BranchManagement from './BranchManagement';
+import AddIcon from '@mui/icons-material/Add';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 export default function BranchDashboard() {
   const navigate = useNavigate();
 
-  const handleAddBranch = () => {
-    navigate('/admin/branches/create');
+  // Navigation handlers are now more descriptive
+  const handleNavigateToCreate = () => {
+    navigate('/admin/branches/create'); // Assumes you'll have a dedicated create route/page
   };
 
-  const handleViewBranches = () => {
-    navigate('/admin/branches/list');
+  const handleNavigateToList = () => {
+    navigate('/admin/branches/manage'); // The main management page
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Paper sx={{ p: 4, borderRadius: 2 }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Branch Management Dashboard
+        Branch Management
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        Create new academic branches, view student enrollment, and manage course structures for all branches.
       </Typography>
 
-      <Typography variant="body1" color="text.secondary" gutterBottom>
-        Manage all academic branches, view details, and perform administrative tasks.
-      </Typography>
-
-      <Grid container spacing={3} mt={2}>
+      <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+          <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="h6" gutterBottom>
-              Add New Branch
+              Create a New Branch
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Register a new branch
+            <Typography variant="body2" color="text.secondary" sx={{ minHeight: '40px', mb: 2 }}>
+              Define a new academic program, including its code, coordinator, and capacity.
             </Typography>
-            <Box mt={2}>
-              <Button variant="contained" color="primary" fullWidth onClick={handleAddBranch}>
-                Add Branch
-              </Button>
-            </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={handleNavigateToCreate}
+            >
+              Add Branch
+            </Button>
           </Paper>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+          <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="h6" gutterBottom>
-              View All Branches
+              View & Manage Branches
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Browse the list of all existing branches.
+            <Typography variant="body2" color="text.secondary" sx={{ minHeight: '40px', mb: 2 }}>
+              Browse, edit, and view details for all existing academic branches.
             </Typography>
-            <Box mt={2}>
-              <Button variant="outlined" color="secondary" fullWidth onClick={handleViewBranches}>
-                View Branches
-              </Button>
-            </Box>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<ListAltIcon />}
+              onClick={handleNavigateToList}
+            >
+              Manage Branches
+            </Button>
           </Paper>
         </Grid>
       </Grid>
-    </Box>
+    </Paper>
   );
 }

@@ -1,23 +1,40 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: true,
-    port: 5173,
-    open: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        secure: false,
-      },
-      '/uploads': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        secure: false,
+export default defineConfig(({ mode }) => {
+  // Load environment variables from the correct .env file
+  const env = loadEnv(mode, process.cwd());
+
+  return {
+    plugins: [react()],
+
+    // Shortcut for importing files (e.g., "@/components/Button")
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
       },
     },
-  },
+
+    server: {
+      host: true,  // Allow access from network
+      port: 5173,  // Local dev port
+      open: true,  // Auto-open browser
+
+      // Redirect API requests to backend
+      proxy: {
+        '/api/v1': {
+          target: env.VITE_API_URL, // Set in .env
+          changeOrigin: true,
+          secure: false,
+          rewrite: (p) => p.replace(/^\/api/, ''), // Remove "/api" before sending to backend
+        },
+        '/uploads': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
+  };
 });
