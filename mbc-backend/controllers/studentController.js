@@ -1,122 +1,89 @@
 // controllers/studentController.js
-import Student from '../models/student.js';
-import User from '../models/user.js';
-import Hostel from '../models/Hostel.js';
 import asyncHandler from '../middleware/asyncHandler.js';
 import ErrorResponse from '../utils/errorResponse.js';
+import Student from '../models/student.js';
+import csv from 'fast-csv';
+import {
+  createStudentAndUser,
+  updateStudentAndUser,
+  deleteStudentAndUser,
+  sendPasswordResetLink,
+  exportStudentsToCsv,
+} from '../services/studentService.js';
 
+// @desc    Get all students
+// @route   GET /api/students
 export const getStudents = asyncHandler(async (req, res, next) => {
-  // If advancedResults is present, use it; otherwise fallback to a basic query
-  if (res.advancedResults) {
-    return res.status(200).json(res.advancedResults);
-  }
-  const students = await Student.find().populate('user').populate('branch').populate('hostel');
-  return res.status(200).json({ success: true, count: students.length, data: students });
+  res.status(200).json(res.advancedResults);
 });
 
+// @desc    Add a single student
+// @route   POST /api/students
 export const addStudent = asyncHandler(async (req, res, next) => {
-  const { name, email, password, scholarNo, scholarNumber, mobile, branch, currentSemester } = req.body;
-
-  const resolvedScholarNo = scholarNo || scholarNumber;
-  if (!resolvedScholarNo) {
-    return next(new ErrorResponse('scholarNo or scholarNumber is required', 400));
-  }
-
-  // Create or find user
-  let user = await User.findOne({ email });
-  if (!user) {
-    const effectivePassword = password || Math.random().toString(36).slice(-10);
-    user = await User.create({ name, email, password: effectivePassword, role: 'student' });
-  }
-
-  // Ensure unique scholarNo
-  const existing = await Student.findOne({ scholarNo: resolvedScholarNo });
-  if (existing) {
-    return next(new ErrorResponse('Student with this scholar number already exists', 400));
-  }
-
-  const student = await Student.create({ user: user._id, scholarNo: resolvedScholarNo, mobile, branch, currentSemester });
+  const student = await createStudentAndUser(req.body);
   res.status(201).json({ success: true, data: student });
 });
 
+// @desc    Update a student
+// @route   PUT /api/students/:id
 export const updateStudent = asyncHandler(async (req, res, next) => {
-  const { name, email, mobile, branch, currentSemester, scholarNo, scholarNumber } = req.body;
-  const student = await Student.findById(req.params.id).populate('user');
-  if (!student) {
-    return next(new ErrorResponse(`Student not found with id of ${req.params.id}`, 404));
-  }
-
-  if (name) student.user.name = name;
-  if (email) student.user.email = email;
-  await student.user.save();
-
-  if (mobile !== undefined) student.mobile = mobile;
-  if (branch !== undefined) student.branch = branch;
-  if (currentSemester !== undefined) student.currentSemester = currentSemester;
-  if (scholarNo || scholarNumber) student.scholarNo = scholarNo || scholarNumber;
-
-  await student.save();
+  const student = await updateStudentAndUser(req.params.id, req.body);
   res.status(200).json({ success: true, data: student });
 });
 
+// @desc    Delete a student
+// @route   DELETE /api/students/:id
 export const deleteStudent = asyncHandler(async (req, res, next) => {
-  const student = await Student.findById(req.params.id);
-  if (!student) {
-    return next(new ErrorResponse(`Student not found with id of ${req.params.id}`, 404));
-  }
-  await Student.findByIdAndDelete(req.params.id);
+  await deleteStudentAndUser(req.params.id);
   res.status(200).json({ success: true, data: {} });
 });
 
+// @desc    Send password reset link
+// @route   POST /api/students/:id/send-reset-link
+export const sendResetLink = asyncHandler(async (req, res, next) => {
+    await sendPasswordResetLink(req.params.id);
+    res.status(200).json({ success: true, message: 'Password reset link sent successfully.' });
+});
+
+// @desc    Bulk import students from a CSV file
+// @route   POST /api/students/bulk-import
 export const bulkImportStudents = asyncHandler(async (req, res, next) => {
-  const { branchId, semester, students } = req.body || {};
-  if (!Array.isArray(students) || !branchId) {
-    return next(new ErrorResponse('branchId and students are required', 400));
-  }
-
-  const results = { success: 0, errors: [] };
-  for (const row of students) {
-    try {
-      const resolvedScholarNo = row.scholarNo || row.scholarNumber;
-      if (!resolvedScholarNo || !row.name || !row.email) {
-        results.errors.push(`Row skip (missing required fields)`);
-        continue;
-      }
-
-      let user = await User.findOne({ email: row.email });
-      if (!user) {
-        const randomPass = Math.random().toString(36).slice(-10);
-        user = await User.create({ name: row.name, email: row.email, password: randomPass, role: 'student' });
-      } else {
-        user.name = row.name;
-        await user.save();
-      }
-
-      const studentUpdate = {
-        user: user._id,
-        scholarNo: resolvedScholarNo,
-        mobile: row.mobile,
-        branch: branchId,
-        currentSemester: parseInt(row.currentSemester) || parseInt(semester),
-      };
-
-      if (row.hostelBlock && row.hostelRoom) {
-        let hostel = await Hostel.findOne({ block: row.hostelBlock, room: row.hostelRoom });
-        if (!hostel) hostel = await Hostel.create({ block: row.hostelBlock, room: row.hostelRoom });
-        studentUpdate.hostel = hostel._id;
-      }
-
-      const existing = await Student.findOne({ scholarNo: resolvedScholarNo });
-      if (existing) {
-        await Student.findByIdAndUpdate(existing._id, studentUpdate);
-      } else {
-        await Student.create(studentUpdate);
-      }
-      results.success++;
-    } catch (err) {
-      results.errors.push(err.message);
+    if (!req.file) {
+        return next(new ErrorResponse('Please upload a CSV file.', 400));
     }
-  }
 
-  res.status(200).json({ success: true, data: results, message: 'Bulk import completed' });
+    const results = [];
+    const errors = [];
+    
+    const stream = csv.parse({ headers: true })
+        .on('error', error => next(new ErrorResponse(error.message, 400)))
+        .on('data', row => results.push(row))
+        .on('end', async (rowCount) => {
+            for (const studentData of results) {
+                try {
+                    // Use your service to create each student. This ensures consistency.
+                    await createStudentAndUser(studentData);
+                } catch (error) {
+                    errors.push(`Error on row for ${studentData.email || 'unknown'}: ${error.message}`);
+                }
+            }
+            res.status(200).json({
+                success: true,
+                message: `Processed ${rowCount} rows.`,
+                successfulImports: results.length - errors.length,
+                errors: errors,
+            });
+        });
+
+    stream.write(req.file.buffer);
+    stream.end();
+});
+
+// @desc    Export students to a CSV file
+// @route   GET /api/students/bulk-export
+export const bulkExport = asyncHandler(async (req, res, next) => {
+    const csvData = await exportStudentsToCsv();
+    res.header('Content-Type', 'text/csv');
+    res.attachment('students.csv');
+    res.send(csvData);
 });

@@ -1,7 +1,7 @@
 ﻿// src/stores/authStore.js
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
-import api from "../api/axios"; // ✨ Use the central API service
+import api from "../api/axios"; // Use the central API service
 
 // We use persist middleware to automatically save auth state to localStorage
 export const useAuthStore = create(
@@ -12,14 +12,19 @@ export const useAuthStore = create(
 
       login: async (credentials) => {
         try {
-          const { data } = await api.post("/auth/login", credentials);
-          
-          set({ user: data.user, token: data.token });
-          return data.user;
-        } catch (err) {
-          console.error("Login failed:", err.response?.data || err.message);
-          throw err;
-        }
+            // no /v1 prefix here, proxy rewrite handles it
+            const { data } = await api.post('/auth/login', credentials);
+            if (!data.token) throw new Error('No token received');
+
+            set({ user: data.user, token: data.token });
+            return data.user;
+          } catch (err) {
+            const errorMsg = err.response?.data?.error || 
+                            err.response?.data?.message || 
+                            'Login failed. Please try again.';
+            console.error('Login error:', errorMsg);
+            throw new Error(errorMsg);
+  }
       },
 
       logout: () => {

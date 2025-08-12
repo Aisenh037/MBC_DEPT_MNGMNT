@@ -1,76 +1,60 @@
 // src/features/admin/pages/ProfessorManagement.jsx
 import React, { useState } from 'react';
-import { Box, Typography, Button, Dialog, Stack, IconButton } from '@mui/material';
+import { Box, Typography, Button, Dialog, Stack, IconButton, Tooltip } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-
-// ✨ CORRECTED IMPORTS (using clean path aliases)
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useNotify } from '@/components/UI/NotificationProvider';
 import { useAdminTeachers, useDeleteTeacher } from '@/hooks/useTeachers';
 import TeacherForm from '../components/TeacherForm';
 
 export default function ProfessorManagement() {
-  // State to manage whether the "Add/Edit" dialog is open
   const [dialogOpen, setDialogOpen] = useState(false);
-  // State to hold the teacher data when editing (null if adding a new one)
   const [editingTeacher, setEditingTeacher] = useState(null);
   const notify = useNotify();
 
-  // --- Data Fetching using React Query Hooks ---
-  // Fetches the list of all teachers and provides a loading state
-  const { data: teachers = [], isLoading } = useAdminTeachers();
-  // Provides the function to delete a teacher
+  const { data: teachers = [], isLoading, isError, error } = useAdminTeachers();
   const deleteMutation = useDeleteTeacher();
 
-  // --- Event Handlers ---
   const handleOpenDialog = (teacher = null) => {
     setEditingTeacher(teacher);
     setDialogOpen(true);
   };
-
-  const handleCloseDialog = () => {
-    setEditingTeacher(null);
-    setDialogOpen(false);
-  };
+  const handleCloseDialog = () => setDialogOpen(false);
   
-  // ✨ NEW: This function is passed to the form to be called on a successful save
-  const handleSave = () => {
-    handleCloseDialog();
-    // The useAdminTeachers hook will automatically refetch data because
-    // the mutation hooks in useTeachers.js invalidate the query cache.
-  };
-
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this teacher?')) {
+    if (window.confirm('Are you sure?')) {
       deleteMutation.mutate(id, {
         onSuccess: () => notify('Teacher deleted successfully', 'success'),
-        onError: (err) => notify(err.response?.data?.error || 'Failed to delete teacher', 'error'),
+        onError: (err) => notify(err.response?.data?.error || 'Failed to delete', 'error'),
       });
     }
   };
   
-  // --- Table Configuration ---
   const columns = [
     { field: 'name', headerName: 'Name', flex: 1.5, valueGetter: (params) => params.row.user?.name || 'N/A' },
+    { field: 'email', headerName: 'Email', flex: 2, valueGetter: (params) => params.row.user?.email || 'N/A' },
     { field: 'employeeId', headerName: 'Employee ID', flex: 1 },
     { field: 'department', headerName: 'Department', flex: 1 },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 120,
+      sortable: false,
       renderCell: (params) => (
         <Stack direction="row">
-          <IconButton color="primary" onClick={() => handleOpenDialog(params.row)}><EditIcon /></IconButton>
-          <IconButton color="error" onClick={() => handleDelete(params.row._id)}><DeleteIcon /></IconButton>
+          <Tooltip title="Edit Teacher">
+            <IconButton color="primary" onClick={() => handleOpenDialog(params.row)}><EditIcon /></IconButton>
+          </Tooltip>
+          <Tooltip title="Delete Teacher">
+            <IconButton color="error" onClick={() => handleDelete(params.row._id)}><DeleteIcon /></IconButton>
+          </Tooltip>
         </Stack>
       ),
     },
   ];
 
   return (
-    <Box sx={{ height: 650, width: '100%' }}>
+    <Box sx={{ height: 'calc(100vh - 150px)', width: '100%' }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="h5" fontWeight="bold">Manage Teachers</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
@@ -80,17 +64,13 @@ export default function ProfessorManagement() {
       <DataGrid
         rows={teachers}
         columns={columns}
-        loading={isLoading}
+        loading={isLoading || deleteMutation.isLoading}
         getRowId={(row) => row._id}
-        sx={{ bgcolor: 'background.paper' }}
+        sx={{ bgcolor: 'background.paper', border: 'none' }}
+        error={isError ? error.message : null}
       />
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        {/* Pass the onSave handler to the form */}
-        <TeacherForm 
-          editingTeacher={editingTeacher} 
-          onClose={handleCloseDialog} 
-          onSave={handleSave} 
-        />
+        <TeacherForm editingTeacher={editingTeacher} onClose={handleCloseDialog} />
       </Dialog>
     </Box>
   );

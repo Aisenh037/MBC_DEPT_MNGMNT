@@ -1,39 +1,49 @@
 // src/components/UI/StatCard.jsx
-import { Paper, Avatar, Box, Typography, CircularProgress } from '@mui/material';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Card, CardActionArea, CardContent, Typography, Box, CircularProgress, alpha } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 export default function StatCard({ item, loading }) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    if (item.link) {
+      navigate(item.link);
+    }
+  };
+
   return (
-    <Paper
-      component={item.link ? Link : 'div'} // Allow card to not be a link
-      to={item.link}
-      elevation={2}
-      sx={{
-        p: 2.5,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderRadius: '16px',
-        textDecoration: 'none',
-        color: 'inherit',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: 6,
+    <Card 
+      sx={{ 
+        height: '100%',
+        // THE FIX IS HERE: Use a theme callback to resolve the color first
+        backgroundColor: (theme) => {
+          // Fallback to a default color if item.color is not a valid theme color
+          const colorPath = item.color.split('.');
+          const colorValue = theme.palette[colorPath[0]]?.[colorPath[1]] || theme.palette.grey[200];
+          return alpha(colorValue, 0.15); // Increased alpha slightly for better visibility
         },
       }}
     >
-      <Box sx={{ textAlign: 'left' }}>
-        <Typography variant="h4" fontWeight="bold" color="text.primary">
-          {loading ? <CircularProgress size={28} color="inherit" /> : item.count}
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {item.title}
-        </Typography>
-      </Box>
-      <Avatar sx={{ bgcolor: item.color, width: 56, height: 56 }}>
-        {item.icon}
-      </Avatar>
-    </Paper>
+      <CardActionArea onClick={handleCardClick} sx={{ height: '100%', p: 2 }}>
+        <CardContent sx={{ textAlign: 'center' }}>
+          {loading ? (
+            <CircularProgress sx={{ color: item.color }} />
+          ) : (
+            <>
+              <Box sx={{ color: item.color, mb: 1 }}>
+                {React.cloneElement(item.icon, { style: { fontSize: 40 } })}
+              </Box>
+              <Typography variant="h4" component="div" fontWeight="bold">
+                {item.count ?? 0}
+              </Typography>
+              <Typography variant="h6" color="text.secondary">
+                {item.title}
+              </Typography>
+            </>
+          )}
+        </CardContent>
+      </CardActionArea>
+    </Card>
   );
 }

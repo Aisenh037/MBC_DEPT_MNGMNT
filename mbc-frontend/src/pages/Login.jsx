@@ -11,7 +11,7 @@ import {
   CircularProgress,
   Alert, // For better error display
 } from "@mui/material";
-import logo from '../assets/Manit_Logo_color_0-removebg-preview.png'; // Make sure this path is correct
+import logo from '../assets/Manit_Logo_color_0-removebg-preview.png'; 
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -48,20 +48,21 @@ export default function Login() {
 
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      // Call the login action from the store
-      await login({ email, password });
-      // The useEffect hook above will handle successful navigation
-    } catch (err) {
-      // Set a user-friendly error message from the server response if available
-      setError(err.response?.data?.error || "Login failed. Please check your credentials.");
-      console.error("Login failed:", err);
-    } finally {
-      setLoading(false);
-    }
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+  
+  try {
+    await login({ email, password });
+  } catch (err) {
+    setError(
+      err.message.includes("Network Error") 
+        ? "Cannot connect to server. Please try again later."
+        : err.message
+    );
+  } finally {
+    setLoading(false);
+  }
   };
 
   return (
@@ -82,10 +83,10 @@ export default function Login() {
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 2 }}>
           <img src={logo} alt="MANIT Bhopal Logo" style={{ width: 64, height: 64, marginBottom: '16px' }} />
           <Typography component="h1" variant="h5" fontWeight="bold" color="primary">
-            MBC Department Portal
+            MBC Portal
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Sign in to continue
+            Welcome to the MBC Department
           </Typography>
         </Box>
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>

@@ -1,14 +1,12 @@
-// src/api/axios.js
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 
 const api = axios.create({
-  // ✨ FIX: Use a relative path. This allows the Vite proxy to work correctly.
-  baseURL: '/api/v1',
+  baseURL: '/api', // Works with the proxy rewrite
   withCredentials: true,
 });
 
-// This 'interceptor' adds the auth token to every request
+// Attach token to every request
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().token;
@@ -20,13 +18,13 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// This 'interceptor' handles automatic logout on token errors
+// Handle 401 responses globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();
-      window.location.href = '/'; // Redirect to login page
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

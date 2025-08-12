@@ -14,50 +14,17 @@ const branchSchema = new mongoose.Schema({
   capacity: {
     type: Number,
     required: true,
+    default: 0
   },
   department: {
     type: String,
-    enum: ['MBC BTech', 'MBC MTech', 'MBC PhD', ' MBC MCA'],
+    enum: ['MBC', 'CSE', 'ECE', ' EE'],
     required: true,
   },
-  available: {
-    type: Boolean,
-    default: true,
-  },
-  bookings: [
-    {
-      user: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'User',
-        required: true,
-      },
-      date: {
-        type: Date,
-        required: true,
-      },
-      startTime: {
-        type: String,
-        required: true,
-      },
-      endTime: {
-        type: String,
-        required: true,
-      },
-      purpose: {
-        type: String,
-        required: true,
-      },
-      status: {
-        type: String,
-        enum: ['pending', 'approved', 'rejected'],
-        default: 'pending',
-      },
-    },
-  ],
   createdAt: {
     type: Date,
     default: Date.now,
-  },
+  }
 });
 
 const Branch = mongoose.model('Branch', branchSchema);

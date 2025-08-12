@@ -1,12 +1,13 @@
-// src/features/admin/dashboard/admin/AdminDashboard.jsx
+// src/features/admin/pages/AdminDashboard.jsx
 import React from 'react';
 import { Grid, Typography } from '@mui/material';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import CoPresentIcon from '@mui/icons-material/CoPresent';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import CampaignIcon from '@mui/icons-material/Campaign';
-import StatCard from '../../../components/UI/StatCard';
-import { useAnalytics } from '../../../hooks/useAnalytics'; //  
+import StatCard from '../../../components/UI/StatCard'; 
+import { useAnalytics } from '../../../hooks/useAnalytics'; 
+
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useAnalytics();
 

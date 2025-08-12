@@ -1,8 +1,7 @@
-// src/features/admin/AdminLayout.jsx
+// src/components/Layout/AdminLayout.jsx
 import React from 'react';
 import { Box } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-// ✨ CORRECTED PATHS: These shared components are outside the 'features' folder
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 
@@ -10,22 +9,25 @@ const drawerWidth = 240;
 
 export default function AdminLayout() {
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'grey.100' }}>
+      {/* The permanent sidebar on the left */}
       <AdminSidebar />
+
+      {/* The main content area on the right */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          minHeight: '100vh',
-          bgcolor: 'grey.100',
+          width: `calc(100% - ${drawerWidth}px)`,
+          p: 3,
+          overflowY: 'auto', // Allows content to scroll independently
         }}
       >
-        <Box sx={{ p: 3 }}>
-          <AdminHeader />
-          {/* All nested admin pages (like BranchManagement) will render here */}
-          <Outlet />
-        </Box>
+        {/* The header will now sit at the top of the content area */}
+        <AdminHeader />
+
+        {/* This is where your nested routes (Dashboard, Students, etc.) will be rendered */}
+        <Outlet />
       </Box>
     </Box>
   );

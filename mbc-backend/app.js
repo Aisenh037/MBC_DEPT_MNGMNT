@@ -19,18 +19,18 @@ import errorHandler from './middleware/errorHandler.js';
 
 // CORRECTED ROUTE IMPORTS
 import authRoutes from './routes/authRoute.js';
-import usersRoutes from './routes/usersRouter.js';
-import teachersRoutes from './routes/teacherDashboard.js';
+import usersRoutes from './routes/usersRouter.js';  
+import teachersRoutes from './routes/professorRoute.js';
 import studentRoutes from './routes/studentRoute.js';
 import subjectRoutes from './routes/subjectRoute.js';
-import branchRoutes from './routes/branchRoute.js';
+import branchRoutes from './routes/branchRoute.js';  
 import assignmentRoutes from './routes/assignmentRoute.js';
 import marksRoutes from './routes/marksRoute.js';
-import attendanceRoutes from './routes/attendenceRoute.js';
+import attendanceRoutes from './routes/attendenceRoute.js';  
 import noticeRoutes from './routes/noticeRoute.js';
-import analyticsRoutes from './routes/analytics.js';
-import studentDashboardRoutes from './routes/studentDashboard.js';
-import teacherDashboardRoutes from './routes/teacherDashboard.js';
+import analyticsRoutes from './routes/analytics.js';  
+import studentDashboardRoutes from './routes/studentDashboard.js';  
+import teacherDashboardRoutes from './routes/teacherDashboard.js';  
 
 dotenv.config();
 
@@ -88,7 +88,7 @@ app.use(`${API_PREFIX}/dashboards/student`, studentDashboardRoutes);
 app.use(`${API_PREFIX}/dashboards/teacher`, teacherDashboardRoutes);
 
 // --- HEALTH CHECK & 404 HANDLER ---
-app.get('/', (req, res) => res.status(200).json({ success: true, message: 'Server is running smoothly 🚀' }));
+app.get('/', (req, res) => res.status(200).json({ success: true, message: 'Server is running smoothly' }));
 app.use((req, res) => res.status(404).json({ success: false, error: 'API endpoint not found' }));
 
 // --- GLOBAL ERROR HANDLER (must be last) ---

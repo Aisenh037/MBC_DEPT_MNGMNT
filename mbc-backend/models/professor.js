@@ -2,29 +2,13 @@
 import mongoose from 'mongoose';
 
 const professorSchema = new mongoose.Schema({
-  user: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true 
-  },
-  employeeId: { 
-    type: String, 
-    unique: true, 
-    required: [true, 'Employee ID is required'],
-    trim: true,
-  },
-  department: { 
-    type: String,
-    enum: ['MBC BTech', 'MBC MTech', 'MBC PhD', ' MBC MCA'],
-  },
-  subjects: [{ 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Subject' 
-  }],
-  classes: [{ 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Class' 
-  }]
-});
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  teacherId: { type: String, unique: true, required: [true, 'Teacher ID is required'], trim: true },
+
+  // A professor can now be associated with multiple branches
+  branches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' }],
+  mobile: { type: String, trim: true },
+  Email: { type: String, trim: true }
+}, { timestamps: true });
 
 export default mongoose.model('Professor', professorSchema);

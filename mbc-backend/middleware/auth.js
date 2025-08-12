@@ -4,7 +4,7 @@ import asyncHandler from './asyncHandler.js';
 import ErrorResponse from '../utils/errorResponse.js';  
 import User from '../models/user.js';  
 
-const protect = asyncHandler(async (req, res, next) => {
+export const protect = asyncHandler(async (req, res, next) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -20,6 +20,13 @@ const protect = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Not authorized to access this route', 401));
   }
 
+   // Ensure JWT_SECRET exists
+  if (!process.env.JWT_SECRET) {
+    return next(new ErrorResponse('JWT_SECRET is not set in environment variables', 500));
+  }
+
+
+
   try {
     // Verify token and then find the user from the database
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -32,8 +39,33 @@ const protect = asyncHandler(async (req, res, next) => {
     next();
   } catch (err) {
     // This will catch expired tokens, malformed tokens, etc.
-    return next(new ErrorResponse('Not authorized, token failed', 401));
+    // Handle JWT-specific errors
+    if (err.name === 'TokenExpiredError') {
+      return next(new ErrorResponse('Token has expired, please log in again', 401));
+    }
+    if (err.name === 'JsonWebTokenError') {
+      return next(new ErrorResponse('Invalid token, authentication failed', 401));
+    }
+
+    // Generic fallback
+    return next(new ErrorResponse('Not authorized, token verification failed', 401));
   }
 });
+
+export const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return next(
+        new ErrorResponse(
+          `Role '${req.user?.role}' is not authorized to access this route`,
+          403
+        )
+      );
+    }
+    next();
+  };
+};
+
+
 
 export default protect;

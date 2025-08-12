@@ -11,7 +11,9 @@
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development nodemon index.js",
     "test": "jest --watchAll --detectOpenHandles",
-    "lint": "eslint . --ext .js"
+    "lint": "eslint . --ext .js",
+    "seed": "node utils/seeder.js",
+    "seed:destroy": "node utils/seeder.js -d"
   },
   "keywords": [
     "MBC",
@@ -25,6 +27,8 @@
     "colors": "^1.4.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-mongo-sanitize": "^2.2.0",
@@ -32,11 +36,14 @@
     "helmet": "^7.1.0",
     "hpp": "^0.2.3",
     "joi": "^17.13.0",
+    "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.3.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.13",
+    "nodemailer": "^6.10.1",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0",
     "winston": "^3.13.0",
     "winston-daily-rotate-file": "^5.0.0",
     "xss-clean": "^0.1.4"
