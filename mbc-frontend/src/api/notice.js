@@ -1,5 +1,5 @@
 // src/api/notice.js
-import api from './axios.js';
+import api from '../services/apiClient';
 
 export const getNotices = (params) => api.get('/notices', { params });
 export const createNotice = (noticeData) => api.post('/notices', noticeData);
