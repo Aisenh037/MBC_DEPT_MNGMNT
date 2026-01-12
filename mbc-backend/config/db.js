@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import 'colors';  
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import 'colors';
 
 let memoryServer = null;
 
@@ -9,6 +8,7 @@ const connectDB = async () => {
     const shouldUseMemory = !process.env.MONGO_URI || process.env.USE_IN_MEMORY_DB === 'true';
 
     if (shouldUseMemory) {
+      const { MongoMemoryServer } = await import('mongodb-memory-server');
       memoryServer = await MongoMemoryServer.create();
       const uri = memoryServer.getUri();
       process.env.MONGO_URI = uri;
